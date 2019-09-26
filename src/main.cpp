@@ -27,7 +27,7 @@ void loop()
 {
   if (ROBUS_IsBumper(3))
   {
-    avancerDistance(5, 0.5);
+    avancerDistance(1, 0.5);
   }
 
    if (ROBUS_IsBumper(1))
@@ -65,8 +65,8 @@ void avancerDistance(double distanceVoulue, double vitesseVoulue)
   Serial.println(nbPulseVoulu);
   MOTOR_SetSpeed(LEFT, 0.1 * correctionMoteurGauche);
   MOTOR_SetSpeed(RIGHT, 0.1 * correctionMoteurDroit);
-  double derniereVitesseMoteur0 = 0.1;
-  double derniereVitesseMoteur1 = 0.1;
+  double derniereVitesseMoteur0 = 0.1* correctionMoteurGauche;
+  double derniereVitesseMoteur1 = 0.1 * correctionMoteurDroit;
   
   while( distanceParcourue < (distanceVoulue) && !ROBUS_IsBumper(2)) //S'execute tant que la distance voulue n'est pas atteinte et que le bumper avant n'est pas touche
   {
@@ -79,11 +79,12 @@ void avancerDistance(double distanceVoulue, double vitesseVoulue)
 
     if (valeurEncodeur0 != nbPulseVoulu) 
     {
+
       diffDistance = nbPulseVoulu - valeurEncodeur0;
       nbPulseTotal0 = nbPulseTotal0 + valeurEncodeur0;
       correctionInteg0 = nbPulseTotalVoulu - nbPulseTotal0;
-      MOTOR_SetSpeed(LEFT, derniereVitesseMoteur0 + (diffDistance * 0.0001) + (correctionInteg0 * 0.00002));
-      derniereVitesseMoteur0 = derniereVitesseMoteur0 + (diffDistance * 0.0001) + (correctionInteg0 * 0.00002);
+      MOTOR_SetSpeed(LEFT, derniereVitesseMoteur0 + (diffDistance * 0.0001) + (correctionInteg0 * 0.000015));
+      derniereVitesseMoteur0 = derniereVitesseMoteur0 + (diffDistance * 0.0001) + (correctionInteg0 * 0.000015);
     }
 
     if (valeurEncodeur1 != nbPulseVoulu) 
@@ -91,12 +92,12 @@ void avancerDistance(double distanceVoulue, double vitesseVoulue)
       diffDistance = nbPulseVoulu - valeurEncodeur1;
       nbPulseTotal1 = nbPulseTotal1 + valeurEncodeur1;
       correctionInteg1 = nbPulseTotalVoulu - nbPulseTotal1;
-      MOTOR_SetSpeed(RIGHT, derniereVitesseMoteur1 + (diffDistance * 0.0001) + (correctionInteg1 * 0.00002));
-      derniereVitesseMoteur1 = derniereVitesseMoteur1 + (diffDistance * 0.0001) + (correctionInteg1 * 0.00002);
+      MOTOR_SetSpeed(RIGHT, derniereVitesseMoteur1 + (diffDistance * 0.0001) + (correctionInteg1 * 0.000015));
+      derniereVitesseMoteur1 = derniereVitesseMoteur1 + (diffDistance * 0.0001) + (correctionInteg1 * 0.000015);
     }
 
 
-   }'
+  
 
     Serial.println(nbPulseTotal0);
     Serial.println(nbPulseTotalVoulu);
@@ -183,11 +184,11 @@ void TournerAngle1Moteur(double angleVoulu, double vitesseVoulue)
   delay(500);
 }
 
-void ajustementMoteur(double nbPulseVoulu, double nbCycles, double valeurEncodeur, double *nbPulseTotal, double *derniereVitesseMoteur)
+/*void ajustementMoteur(double nbPulseVoulu, double nbCycles, double valeurEncodeur, double *nbPulseTotal, double *derniereVitesseMoteur)
 { 
   double diffDistance = nbPulseVoulu + valeurEncodeur;
   nbPulseTotal = nbPulseTotal + valeurEncodeur;
   double correctionInteg = nbPulseTotal * nbCycles - nbPulseTotal;
   MOTOR_SetSpeed(RIGHT, derniereVitesseMoteur + (diffDistance * 0.0001) + (correctionInteg * 0.00002));
   derniereVitesseMoteur = derniereVitesseMoteur + (diffDistance * 0.0001) + (correctionInteg * 0.00002);
-}
+}*/
