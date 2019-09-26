@@ -9,6 +9,9 @@ const double NB_PULSE_TOUR = 3200; //Le nombre de pulse de l'encodeur pour 1 tou
 double correctionMoteurGauche = 1.048;
 double correctionMoteurDroit = 1;
 
+const double VITESSE_AVANCER = 0.25;
+const double VITESSE_TOURNER = 0.25;
+
 void avancerDistance(double distanceVoulue, double vitesseVoulue);
 void TournerAngle1Moteur(double angleVoulu, double vitesseVoulue);
 void ajustementMoteur(int coteMoteur, double nbPulseVoulu, double nbCycles, double valeurEncodeur, double *nbPulseTotal, double *derniereVitesseMoteur);
@@ -28,19 +31,34 @@ void setup()
 
 void loop() 
 {
-  if (ROBUS_IsBumper(3))
+  if (ROBUS_IsBumper(3) && !ROBUS_IsBumper(2))
   {
-    avancerDistance(1.17, 0.25);
-    TournerAngle1Moteur(-90, 0.25);
-    avancerDistance(0.90, 0.25);
-    TournerAngle1Moteur(90, 0.25);
-    avancerDistance(0.97, 0.25);
-    TournerAngle1Moteur(45, 0.25);
-    avancerDistance(1.72, 0.25);
-    TournerAngle1Moteur(-90, 0.25);
-    avancerDistance(0.55, 0.25);
-    TournerAngle1Moteur(40, 0.25);
-    avancerDistance(1.30, 0.25);
+    avancerDistance(1.17, VITESSE_AVANCER);
+    TournerAngle1Moteur(-90, VITESSE_TOURNER);
+    avancerDistance(0.85, VITESSE_AVANCER);
+    TournerAngle1Moteur(90, VITESSE_TOURNER);
+    avancerDistance(0.90, VITESSE_AVANCER);
+    TournerAngle1Moteur(45, VITESSE_TOURNER);
+    avancerDistance(1.77, VITESSE_AVANCER);
+    TournerAngle1Moteur(-90, VITESSE_TOURNER);
+    avancerDistance(0.50, VITESSE_AVANCER);
+    TournerAngle1Moteur(45, VITESSE_TOURNER);
+    avancerDistance(1.30, VITESSE_AVANCER);
+
+    TournerAngle1Moteur(180, VITESSE_TOURNER);
+
+    avancerDistance(1.30, VITESSE_AVANCER);
+    TournerAngle1Moteur(-45, VITESSE_TOURNER);
+    avancerDistance(0.55, VITESSE_AVANCER);
+    TournerAngle1Moteur(90, VITESSE_TOURNER);
+    avancerDistance(1.77, VITESSE_AVANCER);
+    TournerAngle1Moteur(-45, VITESSE_TOURNER);
+    avancerDistance(0.90, VITESSE_AVANCER);
+    TournerAngle1Moteur(-90, VITESSE_TOURNER);
+    avancerDistance(0.85, VITESSE_AVANCER);
+    TournerAngle1Moteur(90, VITESSE_TOURNER);
+    avancerDistance(1.17, VITESSE_AVANCER);
+
 
   }
 
@@ -116,7 +134,7 @@ void avancerDistance(double distanceVoulue, double vitesseVoulue)
   MOTOR_SetSpeed(LEFT, 0); //Le robot s'arrete une fois que la distance est atteinte ou quand son bumper avant est frappé
   MOTOR_SetSpeed(RIGHT, 0);
 
-  delay(500);
+  delay(50);
 }
 
 void TournerAngle1Moteur(double angleVoulu, double vitesseVoulue)
@@ -203,7 +221,7 @@ void TournerAngle1Moteur(double angleVoulu, double vitesseVoulue)
   MOTOR_SetSpeed(LEFT, 0); //Le robot s'arrete une fois que la distance est atteinte ou quand son bumper avant est frappé
   MOTOR_SetSpeed(RIGHT, 0);
 
-  delay(500);
+  delay(50);
 }
 
 void ajustementMoteur(int coteMoteur, double nbPulseVoulu, double nbCycles, double valeurEncodeur, double *nbPulseTotal, double *derniereVitesseMoteur)
@@ -211,6 +229,6 @@ void ajustementMoteur(int coteMoteur, double nbPulseVoulu, double nbCycles, doub
   double diffDistance = nbPulseVoulu - valeurEncodeur;
   (*nbPulseTotal) = (*nbPulseTotal) + valeurEncodeur;
   double correctionInteg = nbPulseVoulu * nbCycles - (*nbPulseTotal) ;
-  MOTOR_SetSpeed(coteMoteur, (*derniereVitesseMoteur) + (diffDistance * 0.0001) + (correctionInteg * 0.000015));
-  (*derniereVitesseMoteur) = (*derniereVitesseMoteur) + (diffDistance * 0.0001) + (correctionInteg * 0.000015);
+  MOTOR_SetSpeed(coteMoteur, (*derniereVitesseMoteur) + (diffDistance * 0.0001) + (correctionInteg * 0.00005));
+  (*derniereVitesseMoteur) = (*derniereVitesseMoteur) + (diffDistance * 0.0001) + (correctionInteg * 0.00005);
 }
