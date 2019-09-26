@@ -4,8 +4,8 @@
 float lastMotorSpeed;
 const double pi = 3.1415926535897932384626433832795028841; //Remplacer par PI qui est dans la libraire Arduino.h
 const double DIAMETRE_ROUE = 0.077; //Le diametre d'une roue en metres
-const double DISTANCE_ENTRE_ROUES = 0.077; //La distance entre les roues paralles en metres
-const int NB_PULSE_TOUR = 3200; //Le nombre de pulse de l'encodeur pour 1 tour de roue
+const double DISTANCE_ENTRE_ROUES = 0.785; //La distance entre les roues paralles en metres
+const double NB_PULSE_TOUR = 3200; //Le nombre de pulse de l'encodeur pour 1 tour de roue
 double correctionMoteurGauche = 1.048;
 double correctionMoteurDroit = 1;
 
@@ -63,20 +63,24 @@ void TournerAngle1Moteur(double angleVoulu, double vitesseVoulue)
   int delaiMesure = 50; //Le delai de mesure de la distance en millisecondes
   double diffDistance;  //La difference de pulse entre l'encodeur et 350
   double distanceParcourue = 0; //La distance parcourue en metres
-  double distanceVoulu = (angleVoulu / 360) * 2 * PI * DISTANCE_ENTRE_ROUES;
+  double distanceVoulue = fabs((angleVoulu / 360) * PI * DISTANCE_ENTRE_ROUES);
   double derniereVitesseMoteur0;
   double derniereVitesseMoteur1;
 
   double valeurEncodeur0;
   double valeurEncodeur1;
 
-  int nbPulseVoulu = vitesseVoulue * delaiMesure / ((1/NB_PULSE_TOUR) * pi*DIAMETRE_ROUE);
-  int distanceVoulu = 
+  double nbPulseVoulu = vitesseVoulue * delaiMesure / ((1/NB_PULSE_TOUR) * pi*DIAMETRE_ROUE); 
+  double nbPulseVoulu0;
+  double nbPulseVoulu1;
+
   if (angleVoulu > 0) {
     MOTOR_SetSpeed(LEFT, 0.25 * correctionMoteurGauche);
     MOTOR_SetSpeed(RIGHT, -0.25 * correctionMoteurDroit);
     derniereVitesseMoteur0 = 0.25;
     derniereVitesseMoteur1 = -0.25;
+    nbPulseVoulu0 = nbPulseVoulu;
+    nbPulseVoulu1 = nbPulseVoulu * -1;
   }
 
   if (angleVoulu < 0) {
@@ -84,12 +88,22 @@ void TournerAngle1Moteur(double angleVoulu, double vitesseVoulue)
     MOTOR_SetSpeed(RIGHT, 0.25 * correctionMoteurDroit);
     derniereVitesseMoteur0 = -0.25;
     derniereVitesseMoteur1 = 0.25;
+    nbPulseVoulu0 = nbPulseVoulu * -1;
+    nbPulseVoulu1 = nbPulseVoulu;
   }
 
-  
-  
-  while( distanceParcourue < (distanceVoulue - 0.05) && !ROBUS_IsBumper(2)) //S'execute tant que la distance voulue n'est pas atteinte et que le bumper avant n'est pas touche
+  Serial.println("angleVoulu:");
+  Serial.println(angleVoulu);
+  Serial.println("DistanceVoulue:");
+  Serial.println(distanceVoulue);
+  Serial.println(fabs(distanceVoulue));
+  Serial.println("distanceParcourue");
+  Serial.println(distanceParcourue);
+
+
+  while( (fabs(distanceParcourue) < fabs(distanceVoulue)) && !ROBUS_IsBumper(2)) //S'execute tant que la distance voulue n'est pas atteinte et que le bumper avant n'est pas touche
   {
+    Serial.println("Loooopin");
     ENCODER_ReadReset(LEFT);
     ENCODER_ReadReset(RIGHT);
     delay(delaiMesure);
@@ -104,15 +118,16 @@ void TournerAngle1Moteur(double angleVoulu, double vitesseVoulue)
     }
     if (valeurEncodeur1 != nbPulseVoulu) 
     {
-      diffDistance = 350 - valeurEncodeur1;
+      diffDistance = -350 - valeurEncodeur1;
       MOTOR_SetSpeed(RIGHT, derniereVitesseMoteur1 + (diffDistance * 0.0005));
       derniereVitesseMoteur1 = derniereVitesseMoteur1 + (diffDistance * 0.0005);
     }
-    distanceParcourue = distanceParcourue + (((math.abs(valeurEncodeur0) + math.abs(valeurEncodeur1))/2)/NB_PULSE_TOUR) * pi*DIAMETRE_ROUE;
-    Serial.println("Moteur Gauche : ");
-    Serial.println(derniereVitesseMoteur0);
-    Serial.println("Moteur Droit : ");
-    Serial.println(derniereVitesseMoteur1);
+    distanceParcourue = distanceParcourue + (((abs(valeurEncodeur0) + abs(valeurEncodeur1))/2)/NB_PULSE_TOUR) * pi*DIAMETRE_ROUE;
+    //Serial.println("Moteur Gauche : ");
+    //Serial.println(derniereVitesseMoteur0);
+    //Serial.println("Moteur Droit : ");
+    //Serial.println(derniereVitesseMoteur1);
+    Serial.println(distanceParcourue);
   }
 
   MOTOR_SetSpeed(LEFT, 0); //Le robot s'arrete une fois que la distance est atteinte ou quand son bumper avant est frappé
@@ -156,7 +171,7 @@ void TournerAngle1Moteur(double angleVoulu, double vitesseVoulue)
   //MOTOR_SetSpeed(LEFT, 0);
   //MOTOR_SetSpeed(RIGHT, 0);
 
-  delay(500);
+  //delay(500);
 }
 
 void setup()
@@ -184,13 +199,17 @@ void loop()
     avancerDistance(5, 0.30);
   }
 
+   if (ROBUS_IsBumper(1))
+  {
+    Serial.println("Bumper 1");
+    TournerAngle1Moteur(-90, 0.25);
+  }
+  
   if (ROBUS_IsBumper(0))
   {
-    TournerAngle1Moteur(LEFT, 45);
+    Serial.println("Bumper 0");
+    TournerAngle1Moteur(-45, 0.25);
   }
 
-  if (ROBUS_IsBumper(1))
-  {
-    TournerAngle1Moteur(RIGHT, 90);
-  }
+ 
 }
