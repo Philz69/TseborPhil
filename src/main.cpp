@@ -11,6 +11,7 @@ double correctionMoteurDroit = 1;
 
 void avancerDistance(double distanceVoulue, double vitesseVoulue);
 void TournerAngle1Moteur(double angleVoulu, double vitesseVoulue);
+void ajustementMoteur(int coteMoteur, double nbPulseVoulu, double nbCycles, double valeurEncodeur, double *nbPulseTotal, double *derniereVitesseMoteur);
 
 
 //Tourne 1 des 2 moteurs du robot. 0 = LEFT, 1 = RIGHT
@@ -58,6 +59,7 @@ void avancerDistance(double distanceVoulue, double vitesseVoulue)
   double nbPulseTotalVoulu;
   double nbPulseTotal0 = 0;
   double nbPulseTotal1 = 0;
+
   double correctionInteg0 = 0;
   double correctionInteg1 = 0;
 
@@ -67,7 +69,6 @@ void avancerDistance(double distanceVoulue, double vitesseVoulue)
   MOTOR_SetSpeed(RIGHT, 0.1 * correctionMoteurDroit);
   double derniereVitesseMoteur0 = 0.1* correctionMoteurGauche;
   double derniereVitesseMoteur1 = 0.1 * correctionMoteurDroit;
-  
   while( distanceParcourue < (distanceVoulue) && !ROBUS_IsBumper(2)) //S'execute tant que la distance voulue n'est pas atteinte et que le bumper avant n'est pas touche
   {
     ENCODER_ReadReset(LEFT);
@@ -79,21 +80,12 @@ void avancerDistance(double distanceVoulue, double vitesseVoulue)
 
     if (valeurEncodeur0 != nbPulseVoulu) 
     {
-
-      diffDistance = nbPulseVoulu - valeurEncodeur0;
-      nbPulseTotal0 = nbPulseTotal0 + valeurEncodeur0;
-      correctionInteg0 = nbPulseTotalVoulu - nbPulseTotal0;
-      MOTOR_SetSpeed(LEFT, derniereVitesseMoteur0 + (diffDistance * 0.0001) + (correctionInteg0 * 0.000015));
-      derniereVitesseMoteur0 = derniereVitesseMoteur0 + (diffDistance * 0.0001) + (correctionInteg0 * 0.000015);
+      ajustementMoteur(LEFT, nbPulseVoulu, i, valeurEncodeur0, &nbPulseTotal0, &derniereVitesseMoteur0);
     }
 
     if (valeurEncodeur1 != nbPulseVoulu) 
     {
-      diffDistance = nbPulseVoulu - valeurEncodeur1;
-      nbPulseTotal1 = nbPulseTotal1 + valeurEncodeur1;
-      correctionInteg1 = nbPulseTotalVoulu - nbPulseTotal1;
-      MOTOR_SetSpeed(RIGHT, derniereVitesseMoteur1 + (diffDistance * 0.0001) + (correctionInteg1 * 0.000015));
-      derniereVitesseMoteur1 = derniereVitesseMoteur1 + (diffDistance * 0.0001) + (correctionInteg1 * 0.000015);
+      ajustementMoteur(RIGHT, nbPulseVoulu, i, valeurEncodeur1, &nbPulseTotal1, &derniereVitesseMoteur1);
     }
 
 
@@ -184,11 +176,11 @@ void TournerAngle1Moteur(double angleVoulu, double vitesseVoulue)
   delay(500);
 }
 
-/*void ajustementMoteur(double nbPulseVoulu, double nbCycles, double valeurEncodeur, double *nbPulseTotal, double *derniereVitesseMoteur)
+void ajustementMoteur(int coteMoteur, double nbPulseVoulu, double nbCycles, double valeurEncodeur, double *nbPulseTotal, double *derniereVitesseMoteur)
 { 
   double diffDistance = nbPulseVoulu + valeurEncodeur;
-  nbPulseTotal = nbPulseTotal + valeurEncodeur;
-  double correctionInteg = nbPulseTotal * nbCycles - nbPulseTotal;
-  MOTOR_SetSpeed(RIGHT, derniereVitesseMoteur + (diffDistance * 0.0001) + (correctionInteg * 0.00002));
-  derniereVitesseMoteur = derniereVitesseMoteur + (diffDistance * 0.0001) + (correctionInteg * 0.00002);
-}*/
+  (*nbPulseTotal) = (*nbPulseTotal) + valeurEncodeur;
+  double correctionInteg = (*nbPulseTotal) * nbCycles - (*nbPulseTotal) ;
+  MOTOR_SetSpeed(coteMoteur, (*derniereVitesseMoteur) + (diffDistance * 0.0001) + (correctionInteg * 0.000015));
+  (*derniereVitesseMoteur) = (*derniereVitesseMoteur) + (diffDistance * 0.0001) + (correctionInteg * 0.000015);
+}
