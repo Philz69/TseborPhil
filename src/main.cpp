@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <LibRobUS.h>
+
 float lastMotorSpeed;
 const double pi = 3.1415926535897932384626433832795028841; //Remplacer par PI qui est dans la libraire Arduino.h
 const double DIAMETRE_ROUE = 0.077; //Le diametre d'une roue en metres
@@ -52,6 +53,8 @@ void avancerDistance(double distanceVoulue, double vitesseVoulue)
 
   MOTOR_SetSpeed(LEFT, 0); //Le robot s'arrete une fois que la distance est atteinte ou quand son bumper avant est frappé
   MOTOR_SetSpeed(RIGHT, 0);
+
+  delay(500);
 }
 
 //Tourne 1 des 2 moteurs du robot. 0 = LEFT, 1 = RIGHT
@@ -89,6 +92,8 @@ void TournerAngle1Moteur(int side, double angleVoulu)
 
   MOTOR_SetSpeed(LEFT, 0);
   MOTOR_SetSpeed(RIGHT, 0);
+
+  delay(500);
 }
 
 void setup()
