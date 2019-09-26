@@ -64,6 +64,8 @@ void TournerAngle1Moteur(double angleVoulu, double vitesseVoulue)
   double diffDistance;  //La difference de pulse entre l'encodeur et 350
   double distanceParcourue = 0; //La distance parcourue en metres
   double distanceVoulu = (angleVoulu / 360) * 2 * PI * DISTANCE_ENTRE_ROUES;
+  double derniereVitesseMoteur0;
+  double derniereVitesseMoteur1;
 
   double valeurEncodeur0;
   double valeurEncodeur1;
@@ -73,15 +75,15 @@ void TournerAngle1Moteur(double angleVoulu, double vitesseVoulue)
   if (angleVoulu > 0) {
     MOTOR_SetSpeed(LEFT, 0.25 * correctionMoteurGauche);
     MOTOR_SetSpeed(RIGHT, -0.25 * correctionMoteurDroit);
-    double derniereVitesseMoteur0 = 0.25;
-    double derniereVitesseMoteur1 = -0.25;
+    derniereVitesseMoteur0 = 0.25;
+    derniereVitesseMoteur1 = -0.25;
   }
 
   if (angleVoulu < 0) {
     MOTOR_SetSpeed(LEFT, -0.25 * correctionMoteurGauche);
     MOTOR_SetSpeed(RIGHT, 0.25 * correctionMoteurDroit);
-    double derniereVitesseMoteur0 = -0.25;
-    double derniereVitesseMoteur1 = 0.25;
+    derniereVitesseMoteur0 = -0.25;
+    derniereVitesseMoteur1 = 0.25;
   }
 
   
@@ -154,7 +156,7 @@ void TournerAngle1Moteur(double angleVoulu, double vitesseVoulue)
   //MOTOR_SetSpeed(LEFT, 0);
   //MOTOR_SetSpeed(RIGHT, 0);
 
-  //delay(500);
+  delay(500);
 }
 
 void setup()
