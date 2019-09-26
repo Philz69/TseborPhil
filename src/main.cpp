@@ -58,42 +58,103 @@ void avancerDistance(double distanceVoulue, double vitesseVoulue)
 }
 
 //Tourne 1 des 2 moteurs du robot. 0 = LEFT, 1 = RIGHT
-void TournerAngle1Moteur(int side, double angleVoulu)
+void TournerAngle1Moteur(double angleVoulu, double vitesseVoulue)
 {
-  ENCODER_ReadReset(LEFT);
-  ENCODER_ReadReset(RIGHT);
+  int delaiMesure = 50; //Le delai de mesure de la distance en millisecondes
+  double diffDistance;  //La difference de pulse entre l'encodeur et 350
+  double distanceParcourue = 0; //La distance parcourue en metres
+  double distanceVoulu = (angleVoulu / 360) * 2 * PI * DISTANCE_ENTRE_ROUES;
 
-  int nbPulseVoulu = (angleVoulu / 360) * NB_PULSE_TOUR * 2 * PI * DISTANCE_ENTRE_ROUES;
+  double valeurEncodeur0;
+  double valeurEncodeur1;
 
-  double valeurEncodeur0 = ENCODER_Read(LEFT);
-  double valeurEncodeur1 = ENCODER_Read(RIGHT);
-
-  if(side == LEFT)
-  {      
-    MOTOR_SetSpeed(RIGHT, 0.5);
-    
-    while(valeurEncodeur1 < nbPulseVoulu)
-    {
-      delay(50);
-      valeurEncodeur1 = ENCODER_Read(LEFT);
-    }
+  int nbPulseVoulu = vitesseVoulue * delaiMesure / ((1/NB_PULSE_TOUR) * pi*DIAMETRE_ROUE);
+  int distanceVoulu = 
+  if (angleVoulu > 0) {
+    MOTOR_SetSpeed(LEFT, 0.25 * correctionMoteurGauche);
+    MOTOR_SetSpeed(RIGHT, -0.25 * correctionMoteurDroit);
+    double derniereVitesseMoteur0 = 0.25;
+    double derniereVitesseMoteur1 = -0.25;
   }
 
-  if(side == RIGHT)
+  if (angleVoulu < 0) {
+    MOTOR_SetSpeed(LEFT, -0.25 * correctionMoteurGauche);
+    MOTOR_SetSpeed(RIGHT, 0.25 * correctionMoteurDroit);
+    double derniereVitesseMoteur0 = -0.25;
+    double derniereVitesseMoteur1 = 0.25;
+  }
+
+  
+  
+  while( distanceParcourue < (distanceVoulue - 0.05) && !ROBUS_IsBumper(2)) //S'execute tant que la distance voulue n'est pas atteinte et que le bumper avant n'est pas touche
   {
-    MOTOR_SetSpeed(LEFT, 0.5);
+    ENCODER_ReadReset(LEFT);
+    ENCODER_ReadReset(RIGHT);
+    delay(delaiMesure);
+    valeurEncodeur0 = ENCODER_Read(LEFT);
+    valeurEncodeur1 = ENCODER_Read(RIGHT);
 
-    while(valeurEncodeur0 < nbPulseVoulu)
+    if (valeurEncodeur0 != nbPulseVoulu) 
     {
-      delay(50);
-      valeurEncodeur0 = ENCODER_Read(LEFT);
+      diffDistance = 350 - valeurEncodeur0;
+      MOTOR_SetSpeed(LEFT, derniereVitesseMoteur0 + (diffDistance * 0.0005));
+      derniereVitesseMoteur0 = derniereVitesseMoteur0 + (diffDistance * 0.0005);
     }
+    if (valeurEncodeur1 != nbPulseVoulu) 
+    {
+      diffDistance = 350 - valeurEncodeur1;
+      MOTOR_SetSpeed(RIGHT, derniereVitesseMoteur1 + (diffDistance * 0.0005));
+      derniereVitesseMoteur1 = derniereVitesseMoteur1 + (diffDistance * 0.0005);
+    }
+    distanceParcourue = distanceParcourue + (((math.abs(valeurEncodeur0) + math.abs(valeurEncodeur1))/2)/NB_PULSE_TOUR) * pi*DIAMETRE_ROUE;
+    Serial.println("Moteur Gauche : ");
+    Serial.println(derniereVitesseMoteur0);
+    Serial.println("Moteur Droit : ");
+    Serial.println(derniereVitesseMoteur1);
   }
 
-  MOTOR_SetSpeed(LEFT, 0);
+  MOTOR_SetSpeed(LEFT, 0); //Le robot s'arrete une fois que la distance est atteinte ou quand son bumper avant est frappé
   MOTOR_SetSpeed(RIGHT, 0);
 
   delay(500);
+
+
+
+  
+  //ENCODER_ReadReset(LEFT);
+  //ENCODER_ReadReset(RIGHT);
+
+  //int nbPulseVoulu = (angleVoulu / 360) * NB_PULSE_TOUR * 2 * PI * DISTANCE_ENTRE_ROUES;
+
+  //double valeurEncodeur0 = ENCODER_Read(LEFT);
+  //double valeurEncodeur1 = ENCODER_Read(RIGHT);
+
+  //if(side == LEFT)
+  //{      
+  //  MOTOR_SetSpeed(RIGHT, 0.5);
+  //  
+  //  while(valeurEncodeur1 < nbPulseVoulu)
+  //  {
+  //    delay(50);
+  //    valeurEncodeur1 = ENCODER_Read(LEFT);
+  // }
+  //}
+
+  //if(side == RIGHT)
+  //{
+  //  MOTOR_SetSpeed(LEFT, 0.5);
+  // 
+  //  while(valeurEncodeur0 < nbPulseVoulu)
+  // {
+  //    delay(50);
+  //    valeurEncodeur0 = ENCODER_Read(LEFT);
+  //  }
+  //}
+
+  //MOTOR_SetSpeed(LEFT, 0);
+  //MOTOR_SetSpeed(RIGHT, 0);
+
+  //delay(500);
 }
 
 void setup()
