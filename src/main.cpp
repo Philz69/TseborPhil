@@ -22,13 +22,26 @@ void setup()
   BoardInit();
   Serial.begin(9600);
   delay(1500);
+
+
 }
 
 void loop() 
 {
   if (ROBUS_IsBumper(3))
   {
-    avancerDistance(1, 0.5);
+    avancerDistance(1.17, 0.25);
+    TournerAngle1Moteur(-90, 0.25);
+    avancerDistance(0.90, 0.25);
+    TournerAngle1Moteur(90, 0.25);
+    avancerDistance(0.97, 0.25);
+    TournerAngle1Moteur(45, 0.25);
+    avancerDistance(1.72, 0.25);
+    TournerAngle1Moteur(-90, 0.25);
+    avancerDistance(0.55, 0.25);
+    TournerAngle1Moteur(40, 0.25);
+    avancerDistance(1.30, 0.25);
+
   }
 
    if (ROBUS_IsBumper(1))
