@@ -85,6 +85,7 @@ void avancerDistance(double distanceVoulue, double vitesseVoulue)
       MOTOR_SetSpeed(LEFT, derniereVitesseMoteur0 + (diffDistance * 0.0001) + (correctionInteg0 * 0.00002));
       derniereVitesseMoteur0 = derniereVitesseMoteur0 + (diffDistance * 0.0001) + (correctionInteg0 * 0.00002);
     }
+
     if (valeurEncodeur1 != nbPulseVoulu) 
     {
       diffDistance = nbPulseVoulu - valeurEncodeur1;
@@ -93,6 +94,10 @@ void avancerDistance(double distanceVoulue, double vitesseVoulue)
       MOTOR_SetSpeed(RIGHT, derniereVitesseMoteur1 + (diffDistance * 0.0001) + (correctionInteg1 * 0.00002));
       derniereVitesseMoteur1 = derniereVitesseMoteur1 + (diffDistance * 0.0001) + (correctionInteg1 * 0.00002);
     }
+
+
+   }'
+
     Serial.println(nbPulseTotal0);
     Serial.println(nbPulseTotalVoulu);
     Serial.println(correctionInteg0);
@@ -176,4 +181,13 @@ void TournerAngle1Moteur(double angleVoulu, double vitesseVoulue)
   MOTOR_SetSpeed(RIGHT, 0);
 
   delay(500);
+}
+
+void ajustementMoteur(double nbPulseVoulu, double nbCycles, double valeurEncodeur, double *nbPulseTotal, double *derniereVitesseMoteur)
+{ 
+  double diffDistance = nbPulseVoulu + valeurEncodeur;
+  nbPulseTotal = nbPulseTotal + valeurEncodeur;
+  double correctionInteg = nbPulseTotal * nbCycles - nbPulseTotal;
+  MOTOR_SetSpeed(RIGHT, derniereVitesseMoteur + (diffDistance * 0.0001) + (correctionInteg * 0.00002));
+  derniereVitesseMoteur = derniereVitesseMoteur + (diffDistance * 0.0001) + (correctionInteg * 0.00002);
 }
