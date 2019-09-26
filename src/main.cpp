@@ -27,7 +27,7 @@ void loop()
 {
   if (ROBUS_IsBumper(3))
   {
-    avancerDistance(5, 0.30);
+    avancerDistance(5, 0.5);
   }
 
    if (ROBUS_IsBumper(1))
@@ -47,40 +47,59 @@ void loop()
 
 void avancerDistance(double distanceVoulue, double vitesseVoulue)
 {
-  int delaiMesure = 50; //Le delai de mesure de la distance en millisecondes
+  double i = 1;
+  double delaiMesure = 50; //Le delai de mesure de la distance en millisecondes
   double diffDistance;  //La difference de pulse entre l'encodeur et 350
   double distanceParcourue = 0; //La distance parcourue en metres
 
   double valeurEncodeur0;
   double valeurEncodeur1;
 
-  int nbPulseVoulu = (vitesseVoulue * (delaiMesure/1000)) / ((1/NB_PULSE_TOUR) * pi*DIAMETRE_ROUE);
-  MOTOR_SetSpeed(LEFT, 0.25 * correctionMoteurGauche);
-  MOTOR_SetSpeed(RIGHT, 0.25 * correctionMoteurDroit);
-  double derniereVitesseMoteur0 = 0.25;
-  double derniereVitesseMoteur1 = 0.25;
+  double nbPulseTotalVoulu;
+  double nbPulseTotal0 = 0;
+  double nbPulseTotal1 = 0;
+  double correctionInteg0 = 0;
+  double correctionInteg1 = 0;
+
+  double nbPulseVoulu = (vitesseVoulue * (delaiMesure/1000)) / ((1/NB_PULSE_TOUR) * pi*DIAMETRE_ROUE);
+  Serial.println(nbPulseVoulu);
+  MOTOR_SetSpeed(LEFT, 0.1 * correctionMoteurGauche);
+  MOTOR_SetSpeed(RIGHT, 0.1 * correctionMoteurDroit);
+  double derniereVitesseMoteur0 = 0.1;
+  double derniereVitesseMoteur1 = 0.1;
   
-  while( distanceParcourue < (distanceVoulue - 0.05) && !ROBUS_IsBumper(2)) //S'execute tant que la distance voulue n'est pas atteinte et que le bumper avant n'est pas touche
+  while( distanceParcourue < (distanceVoulue) && !ROBUS_IsBumper(2)) //S'execute tant que la distance voulue n'est pas atteinte et que le bumper avant n'est pas touche
   {
     ENCODER_ReadReset(LEFT);
     ENCODER_ReadReset(RIGHT);
     delay(delaiMesure);
     valeurEncodeur0 = ENCODER_Read(LEFT);
     valeurEncodeur1 = ENCODER_Read(RIGHT);
+    nbPulseTotalVoulu = i * nbPulseVoulu;
 
     if (valeurEncodeur0 != nbPulseVoulu) 
     {
-      diffDistance = 350 - valeurEncodeur0;
-      MOTOR_SetSpeed(LEFT, derniereVitesseMoteur0 + (diffDistance * 0.0005));
-      derniereVitesseMoteur0 = derniereVitesseMoteur0 + (diffDistance * 0.0005);
+      diffDistance = nbPulseVoulu - valeurEncodeur0;
+      nbPulseTotal0 = nbPulseTotal0 + valeurEncodeur0;
+      correctionInteg0 = nbPulseTotalVoulu - nbPulseTotal0;
+      MOTOR_SetSpeed(LEFT, derniereVitesseMoteur0 + (diffDistance * 0.0001) + (correctionInteg0 * 0.00002));
+      derniereVitesseMoteur0 = derniereVitesseMoteur0 + (diffDistance * 0.0001) + (correctionInteg0 * 0.00002);
     }
     if (valeurEncodeur1 != nbPulseVoulu) 
     {
-      diffDistance = 350 - valeurEncodeur1;
-      MOTOR_SetSpeed(RIGHT, derniereVitesseMoteur1 + (diffDistance * 0.0005));
-      derniereVitesseMoteur1 = derniereVitesseMoteur1 + (diffDistance * 0.0005);
+      diffDistance = nbPulseVoulu - valeurEncodeur1;
+      nbPulseTotal1 = nbPulseTotal1 + valeurEncodeur1;
+      correctionInteg1 = nbPulseTotalVoulu - nbPulseTotal1;
+      MOTOR_SetSpeed(RIGHT, derniereVitesseMoteur1 + (diffDistance * 0.0001) + (correctionInteg1 * 0.00002));
+      derniereVitesseMoteur1 = derniereVitesseMoteur1 + (diffDistance * 0.0001) + (correctionInteg1 * 0.00002);
     }
+    Serial.println(nbPulseTotal0);
+    Serial.println(nbPulseTotalVoulu);
+    Serial.println(correctionInteg0);
+
+
     distanceParcourue = distanceParcourue + (((valeurEncodeur0 + valeurEncodeur1)/2)/NB_PULSE_TOUR) * pi*DIAMETRE_ROUE;
+    i++;
   }
 
   MOTOR_SetSpeed(LEFT, 0); //Le robot s'arrete une fois que la distance est atteinte ou quand son bumper avant est frappé
