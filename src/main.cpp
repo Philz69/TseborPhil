@@ -27,7 +27,7 @@ void setup()
     BoardInit();
     Serial.begin(9600);
     delay(1500);
-
+}
 void loop() 
 {
     if (ROBUS_IsBumper(3) && !ROBUS_IsBumper(2))
